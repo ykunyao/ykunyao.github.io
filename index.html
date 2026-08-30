@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>yao</title>
+<meta name="description" content="yao's little corner of the internet">
+<meta name="theme-color" content="#fafaf9">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<style>
+@font-face{
+  font-family:"Lora";font-style:normal;font-weight:400 500;font-display:swap;
+  src:url("fonts/lora.woff2") format("woff2");
+}
+@font-face{
+  font-family:"Shantell Sans";font-style:normal;font-weight:400 500;font-display:swap;
+  src:url("fonts/shantell.woff2") format("woff2");
+}
+:root{
+  --paper:#fafaf9;
+  --ink:#292524;
+  --serif:"Lora",Georgia,serif;
+  --hand:"Shantell Sans",cursive;
+}
+*{box-sizing:border-box}
+html{background:var(--paper);color:var(--ink);font-family:var(--serif);font-feature-settings:"liga","kern";-webkit-font-smoothing:antialiased}
+body{margin:0}
+
+.home{flex-direction:column;justify-content:center;align-items:center;gap:1.75rem;width:min(100% - 2rem,47.5rem);min-height:100svh;margin-inline:auto;padding-block:3.5rem;display:flex}
+.avatar{object-fit:cover;border-radius:50%;flex:none;width:5rem;height:5rem;transition:transform .7s;display:block}
+.avatar:hover{transform:rotate(1turn)}
+
+.intro{text-align:center;width:100%;font-size:.85rem;font-weight:450;line-height:1.75rem}
+.typing-animation{justify-items:center;row-gap:.25rem;display:grid}
+.typing-line{white-space:nowrap;justify-content:center;align-items:center;min-height:3.4rem;margin:0;line-height:1.75rem;display:flex}
+.typing-token{white-space:pre;display:inline-grid}
+.typing-token::before,.glyphs{grid-area:1/1}
+.typing-token::before{content:attr(data-text);visibility:hidden}
+.cursor{background:currentColor;width:.48ch;height:1em;margin-left:.125rem;animation:1s step-end infinite blink}
+.cursor[hidden]{display:none}
+@keyframes blink{50%{opacity:0}}
+
+/* ---- hand-drawn annotation links ---- */
+.ann{--ann-color:#7e7a77;color:inherit;background-position:50% 75%;background-repeat:no-repeat;background-size:calc(100% + .42em) .9em;border-radius:.2em;text-decoration:none;display:inline-block;position:relative}
+.ann.is-typed{background-image:linear-gradient(color-mix(in srgb,var(--ann-color) 15%,transparent),color-mix(in srgb,var(--ann-color) 15%,transparent))}
+.ann-red{--ann-color:#c95c54}
+.ann-blue{--ann-color:#477da8}
+
+.ann-note{z-index:1;width:max-content;color:var(--ann-color);font-family:var(--hand);opacity:0;pointer-events:auto;align-items:center;gap:.1em;font-size:.95rem;line-height:1;transition:opacity .18s;display:flex;position:absolute}
+.ann.is-typed .ann-note{opacity:1}
+.ann-note__text{align-items:center;gap:.25em;display:inline-flex;transform:rotate(-3deg)}
+.ann-note__text>svg{width:1rem;height:1rem}
+.ann-note__label{display:inline-block;position:relative}
+.ann-note__underline{fill:none;width:100%;height:.42em;stroke:var(--ann-color);stroke-width:1.2px;stroke-linecap:round;opacity:0;pointer-events:none;position:absolute;bottom:-.22em;left:0;right:0;overflow:visible}
+.ann-note__underline path{stroke-dasharray:140;stroke-dashoffset:140px;transition:stroke-dashoffset .2s ease-out}
+.ann:hover .ann-note__underline,.ann:focus-visible .ann-note__underline{opacity:1}
+.ann:hover .ann-note__underline path,.ann:focus-visible .ann-note__underline path{stroke-dashoffset:0}
+.ann-note>svg{fill:none;stroke:currentColor;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;flex:none;width:2.875rem;height:2.375rem}
+/* note placement variants */
+.ann-ne .ann-note{bottom:50%;left:50%}
+.ann-nw .ann-note{flex-direction:row-reverse;bottom:50%;right:50%}
+
+/* ---- bear paw easter egg ---- */
+.paw-trigger{color:currentColor;opacity:.45;cursor:pointer;background:0 0;border:0;place-items:center;width:1.1rem;height:1.1rem;margin-inline:auto;padding:0;transition:opacity .18s,transform .18s;display:grid}
+.paw-trigger[hidden]{display:none}
+.paw-trigger:hover,.paw-trigger:focus-visible{opacity:.9;transform:scale(1.12)}
+.paw-trigger svg{fill:none;stroke:currentColor;stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;width:100%;height:100%}
+.stamp{z-index:5;pointer-events:none;position:fixed;opacity:0}
+.stamp svg{fill:var(--stamp-color,#292524);width:100%;height:100%}
+.stamp.pop{animation:stamp 2.4s ease-out forwards}
+@keyframes stamp{
+  0%{opacity:0;transform:var(--t) scale(.4) rotate(var(--r))}
+  12%{opacity:var(--o);transform:var(--t) scale(1) rotate(var(--r))}
+  70%{opacity:var(--o)}
+  100%{opacity:0;transform:var(--t) scale(1.04) rotate(var(--r))}
+}
+
+@media (width<=32.5rem){
+  .home{justify-content:flex-start;padding-top:14svh;gap:1.25rem}
+  .typing-line{white-space:normal;flex-wrap:wrap}
+  .typing-token{white-space:pre-wrap}
+  .ann{align-items:center;display:inline-flex}
+  .ann .ann-note{flex-direction:row;flex:0 auto;margin-left:.35rem;display:inline-flex;position:static;transform:none}
+  .ann-note>svg{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<main class="home">
+  <img class="avatar" src="avatar.png" alt="yao" width="160" height="160">
+
+  <div class="intro typing-animation" data-duration="55" data-delay="350">
+
+    <p class="typing-line">
+      <span class="typing-token" data-text="Hi. I'm "><span class="glyphs"></span></span><span class="typing-token" data-text="yao."><span class="glyphs"></span></span><span class="cursor" aria-hidden="true" hidden></span>
+    </p>
+
+    <p class="typing-line">
+      <span class="typing-token" data-text="I "><span class="glyphs"></span></span><a class="ann ann-ne ann-red" href="https://yao.woaiwo.xyz/" target="_blank" rel="noreferrer"><span class="typing-token" data-text="write"><span class="glyphs"></span></span><span class="ann-note" aria-hidden="true"><svg viewBox="0 0 42 28"><path d="M39 14 C25 11 12 15 4 25"/><path d="M5 17 L4 25 L12 23"/></svg><span class="ann-note__text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg><span class="ann-note__label">blog<svg class="ann-note__underline" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="M1.4 5.2 C16 2.4 34 6.6 51 3.6 S79 7 98.6 4.3"/></svg></span></span></span></a><span class="typing-token" data-text=" things down."><span class="glyphs"></span></span><span class="cursor" aria-hidden="true" hidden></span>
+    </p>
+
+    <p class="typing-line">
+      <span class="typing-token" data-text="I "><span class="glyphs"></span></span><a class="ann ann-nw ann-blue" href="https://color.woaiwo.xyz/" target="_blank" rel="noreferrer"><span class="typing-token" data-text="collect"><span class="glyphs"></span></span><span class="ann-note" aria-hidden="true"><svg viewBox="0 0 42 28"><path d="M3 14 C17 11 30 15 38 25"/><path d="M30 23 L38 25 L37 17"/></svg><span class="ann-note__text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 1 10-10c0 1.7-1.3 3-3 3h-2.3a1.7 1.7 0 0 0-1.2 2.9c.3.3.5.7.5 1.1a2 2 0 0 1-2 2Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="15.8" cy="9.3" r="1"/></svg><span class="ann-note__label">colors<svg class="ann-note__underline" viewBox="0 0 100 8" preserveAspectRatio="none"><path d="M1.4 5.2 C16 2.4 34 6.6 51 3.6 S79 7 98.6 4.3"/></svg></span></span></span></a><span class="typing-token" data-text=" colors."><span class="glyphs"></span></span><span class="cursor" aria-hidden="true" hidden></span>
+    </p>
+
+  </div>
+
+  <button class="paw-trigger" type="button" aria-label="Bear paw" title="rawr" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="8.2" cy="5.6" r="1.7"/>
+      <circle cx="15.8" cy="5.6" r="1.7"/>
+      <circle cx="4.4" cy="10.6" r="1.5"/>
+      <circle cx="19.6" cy="10.6" r="1.5"/>
+      <path d="M12 9.2c-3.1 0-5.6 2.5-5.6 5.4 0 1.9 1.4 3.4 3.3 3.4.9 0 1.5-.35 2.3-.35s1.4.35 2.3.35c1.9 0 3.3-1.5 3.3-3.4 0-2.9-2.5-5.4-5.6-5.4Z"/>
+    </svg>
+  </button>
+</main>
+
+<script>
+(function(){
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var lines = Array.prototype.slice.call(document.querySelectorAll(".typing-line"));
+  var paw = document.querySelector(".paw-trigger");
+  var sleep = function(ms){ return new Promise(function(r){ setTimeout(r, ms); }); };
+
+  function finish(){
+    document.querySelectorAll(".typing-token").forEach(function(t){
+      t.querySelector(".glyphs").textContent = t.dataset.text;
+    });
+    document.querySelectorAll(".ann").forEach(function(a){ a.classList.add("is-typed"); });
+    document.querySelectorAll(".cursor").forEach(function(c){ c.hidden = true; });
+    paw.hidden = false;
+  }
+
+  if (reduce) { finish(); return; }
+
+  var DUR = 55, LINE_PAUSE = 280, START = 400;
+
+  (async function type(){
+    await sleep(START);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var cursor = line.querySelector(".cursor");
+      document.querySelectorAll(".cursor").forEach(function(c){ c.hidden = (c !== cursor); });
+      var tokens = Array.prototype.slice.call(line.querySelectorAll(".typing-token"));
+      for (var j = 0; j < tokens.length; j++) {
+        var token = tokens[j];
+        var glyphs = token.querySelector(".glyphs");
+        var text = Array.from(token.dataset.text);
+        for (var k = 1; k <= text.length; k++) {
+          glyphs.textContent = text.slice(0, k).join("");
+          await sleep(DUR);
+        }
+        var ann = token.closest(".ann");
+        if (ann) ann.classList.add("is-typed");
+      }
+      if (i < lines.length - 1) await sleep(LINE_PAUSE);
+    }
+    document.querySelectorAll(".cursor").forEach(function(c){ c.hidden = true; });
+    paw.hidden = false;
+  })();
+
+  /* ---- bear paw: growl + stamps ---- */
+  var actx = null;
+  function growl(){
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      var t = actx.currentTime;
+      var master = actx.createGain();
+      master.gain.setValueAtTime(0.0001, t);
+      master.gain.exponentialRampToValueAtTime(0.4, t + 0.08);
+      master.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      var lp = actx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.setValueAtTime(420, t);
+      lp.frequency.exponentialRampToValueAtTime(120, t + 1.0);
+      lp.Q.value = 6;
+      master.connect(lp).connect(actx.destination);
+      [68, 71.5].forEach(function(f){
+        var o = actx.createOscillator();
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(f, t);
+        o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.9);
+        o.connect(master);
+        o.start(t); o.stop(t + 1.2);
+      });
+    } catch (e) {}
+  }
+
+  var PAW = document.querySelector(".paw-trigger svg").outerHTML;
+  function stamp(){
+    var s = document.createElement("div");
+    s.className = "stamp pop";
+    var size = 34 + Math.random() * 40;
+    s.style.cssText =
+      "width:" + size + "px;height:" + size + "px;" +
+      "left:" + (8 + Math.random() * 84) + "vw;" +
+      "top:" + (12 + Math.random() * 70) + "vh;" +
+      "--r:" + ((Math.random() * 70 - 35) | 0) + "deg;" +
+      "--t:translate(0,0);" +
+      "--o:" + (0.10 + Math.random() * 0.14).toFixed(2) + ";" +
+      "--stamp-color:" + (Math.random() < 0.5 ? "#477da8" : "#292524");
+    s.innerHTML = PAW;
+    document.body.appendChild(s);
+    setTimeout(function(){ s.remove(); }, 2500);
+  }
+
+  paw.addEventListener("click", function(){
+    growl();
+    for (var i = 0; i < 6; i++) setTimeout(stamp, i * 90);
+  });
+})();
+</script>
+</body>
+</html>
